@@ -1,6 +1,7 @@
 # llm.c - William Jardim Fork
 This is a fork of **[Andrej Karpathy's llm.c](https://github.com/karpathy/llm.c)** with some changes that I made to make the code easier for me to read.
-**But I haven't started yet :)**.
+
+My modifications include renaming variables for clarity and adjusting comments for better understanding.
 
 ## License
 This project is distributed under the same license as the original [llm.c](https://github.com/karpathy/llm.c). See the LICENSE file for more details.
