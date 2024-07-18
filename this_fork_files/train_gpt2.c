@@ -83,34 +83,39 @@ void encoder_forward(
     }
 }
 
-void encoder_backward(float* dwte, 
-                      float* dwpe,
-                      float* dout, 
-                      int* inp,
+void encoder_backward(
+                      //FUNCTION PARAMETERS
+                      float* delta_weight_token_embeddings, 
+                      float* delta_weight_positional_embedding,
+                      float* delta_output, 
+                      int* input,
                       int BATCH_SIZE, 
-                      int T, 
-                      int C) 
+                      int SEQUENCE_SIZE, 
+                      int CHANNELS) 
 
 //CODE BEGIN                      
 {           
-    for (int b = 0; b < BATCH_SIZE; b++) 
+    int currentBatchIndex;
+    for (currentBatchIndex = 0; currentBatchIndex < BATCH_SIZE; currentBatchIndex++) 
     {
 
-        for (int t = 0; t < T; t++) 
+        int currentSequenceIndex;
+        for (currentSequenceIndex = 0; currentSequenceIndex < SEQUENCE_SIZE; currentSequenceIndex++) 
         {
-            float* dout_bt = dout + b * T * C + t * C;
+            float* delta_output_bt = delta_output + currentBatchIndex * SEQUENCE_SIZE * CHANNELS + currentSequenceIndex * CHANNELS;
 
-            int ix = inp[b * T + t];
+            int ix = input[currentBatchIndex * SEQUENCE_SIZE + currentSequenceIndex];
 
-            float* dwte_ix = dwte + ix * C;
+            float* delta_weight_token_embeddings_ix = delta_weight_token_embeddings + ix * CHANNELS;
 
-            float* dwpe_t = dwpe + t * C;
+            float* delta_weight_positional_embedding_t = delta_weight_positional_embedding + currentSequenceIndex * CHANNELS;
 
-            for (int i = 0; i < C; i++) 
+            int channelIndex;
+            for (channelIndex = 0; channelIndex < CHANNELS; channelIndex++) 
             {
-                float d = dout_bt[i];
-                dwte_ix[i] += d;
-                dwpe_t[i] += d;
+                float delta = delta_output_bt[channelIndex];
+                delta_weight_token_embeddings_ix[channelIndex] += delta;
+                delta_weight_positional_embedding_t[channelIndex] += delta;
             }
         }
 
