@@ -6,4 +6,4 @@ echo --- Subindo Arquivos ---
 cd ../
 git add .
 git commit -m "%msg%"
-git push origin master  # ou a branch onde você fez as alterações
+git push origin master
