@@ -1,6 +1,9 @@
-# william-llm.c
+# llm.c - William Jardim Fork
 This is a fork of **[Andrej Karpathy's llm.c](https://github.com/karpathy/llm.c)** with some changes that I made to make the code easier for me to read.
 **But I haven't started yet :)**.
+
+## License
+This project is distributed under the same license as the original [llm.c](https://github.com/karpathy/llm.c). See the LICENSE file for more details.
 
 # This Fork Files
 I have made some changes to the original project to make the code easier for me to read. All the files I change will be placed in the this_fork_files folder. **[](this_fork_files/)**
