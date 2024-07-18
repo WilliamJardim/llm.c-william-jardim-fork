@@ -32,53 +32,88 @@ There will be other versions of this code that specialize it and make it fast.
 // all the individual layers' forward and backward passes
 // B = batch_size, T = sequence_length, C = channels, V = vocab_size
 
-void encoder_forward(float* out,
-                   int* inp, float* wte, float* wpe,
-                   int BATCH_SIZE, int T, int C) {
-
-    // out is (BATCH_SIZE,T,C). At each position (b,t), a C-dimensional vector summarizing token & position
-    // inp is (BATCH_SIZE,T) of integers, holding the token ids at each (b,t) position
+void encoder_forward(
+                   //FUNCTION PARAMETERS
+                   float* output,
+                   int* input, 
+                   float* weight_token_embeddings, 
+                   float* weight_positional_embedding,
+                   int BATCH_SIZE, 
+                   int SEQUENCE_SIZE, 
+                   int CHANNELS) 
+//CODE BEGIN
+{
+    // out is (BATCH_SIZE, SEQUENCE_SIZE , C). At each position (b,t), a C-dimensional vector summarizing token & position
+    // inp is (BATCH_SIZE, SEQUENCE_SIZE) of integers, holding the token ids at each (b,t) position
     // wte is (V,C) of token embeddings, short for "weight token embeddings"
     // wpe is (maxT,C) of position embeddings, short for "weight positional embedding"
-    for (int b = 0; b < BATCH_SIZE; b++) {
+    
+    int currentBatchIndex;
+    for (currentBatchIndex = 0; currentBatchIndex < BATCH_SIZE; currentBatchIndex++) 
+    {
 
-        for (int t = 0; t < T; t++) {
-            // seek to the output position in out[b,t,:]
-            float* out_bt = out + b * T * C + t * C;
+        int currentSequenceIndex;
+        for (currentSequenceIndex = 0; currentSequenceIndex < SEQUENCE_SIZE; currentSequenceIndex++) 
+        {
+            // Seek to the output position in out[b,t,:]
+            float* output_bt ;
+            output_bt = output + currentBatchIndex * SEQUENCE_SIZE * CHANNELS + 
+                        currentSequenceIndex * CHANNELS;
 
-            // get the index of the token at inp[b, t]
-            int ix = inp[b * T + t];
+            // Get the index of the token at inp[b, t]
+            int ix; 
+            ix = input[currentBatchIndex * SEQUENCE_SIZE + currentSequenceIndex];
 
-            // seek to the position in wte corresponding to the token
-            float* wte_ix = wte + ix * C;
+            // Seek to the position in weight_token_embeddings corresponding to the token
+            float* weight_token_embeddings_ix;
+            weight_token_embeddings_ix = weight_token_embeddings + ix * CHANNELS;
 
-            // seek to the position in wpe corresponding to the position
-            float* wpe_t = wpe + t * C;
+            // Seek to the position in weight_positional_embedding corresponding to the position
+            float* weight_positional_embedding_t;
+            weight_positional_embedding_t = weight_positional_embedding + currentSequenceIndex * CHANNELS;
 
-            // add the two vectors and store the result in out[b,t,:]
-            for (int i = 0; i < C; i++) {
-                out_bt[i] = wte_ix[i] + wpe_t[i];
+            // Add the two vectors and store the result in out[b,t,:]
+            int channelIndex;
+            for (channelIndex = 0; channelIndex < CHANNELS; channelIndex++) {
+                output_bt[channelIndex] = weight_token_embeddings_ix[channelIndex] + //PLUS
+                                          weight_positional_embedding_t[channelIndex];
             }
         }
 
     }
 }
 
-void encoder_backward(float* dwte, float* dwpe,
-                      float* dout, int* inp,
-                      int B, int T, int C) {
-    for (int b = 0; b < B; b++) {
-        for (int t = 0; t < T; t++) {
+void encoder_backward(float* dwte, 
+                      float* dwpe,
+                      float* dout, 
+                      int* inp,
+                      int BATCH_SIZE, 
+                      int T, 
+                      int C) 
+
+//CODE BEGIN                      
+{           
+    for (int b = 0; b < BATCH_SIZE; b++) 
+    {
+
+        for (int t = 0; t < T; t++) 
+        {
             float* dout_bt = dout + b * T * C + t * C;
+
             int ix = inp[b * T + t];
+
             float* dwte_ix = dwte + ix * C;
+
             float* dwpe_t = dwpe + t * C;
-            for (int i = 0; i < C; i++) {
+
+            for (int i = 0; i < C; i++) 
+            {
                 float d = dout_bt[i];
                 dwte_ix[i] += d;
                 dwpe_t[i] += d;
             }
         }
+
     }
 }
 
